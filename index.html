@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI English Teacher</title>
-<style>
-body{font-family:Arial,sans-serif;background:#0f172a;color:#fff;display:flex;justify-content:center;align-items:center;height:100vh}
-.box{width:95%;max-width:500px;background:#1e293b;padding:20px;border-radius:15px}
-textarea{width:100%;height:100px;border-radius:10px;padding:10px;font-size:16px;border:none}
-button{margin-top:10px;width:100%;padding:12px;font-size:18px;border:none;border-radius:10px;background:#22c55e;cursor:pointer}
-#reply{margin-top:15px;background:#020617;padding:10px;border-radius:10px;min-height:80px}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teacher</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 50px auto; }
+        input, button { padding: 10px; font-size: 16px; width: 100%; margin: 5px 0; }
+        #reply { margin-top: 20px; padding: 10px; border: 1px solid #ccc; min-height: 50px; }
+    </style>
 </head>
 <body>
-<div class="box">
-<h2>🤖 AI English Teacher</h2>
-<textarea id="userInput" placeholder="Write English here (or Bangla if confused)"></textarea>
-<button onclick="startListening()">🎤 Speak</button>
-<button onclick="askAI()">Ask AI</button>
-<div id="reply">AI reply will appear here...</div>
-</div>
-<script>
-function startListening(){
-if(!('webkitSpeechRecognition' in window)){alert("Your browser does not support voice input");return;}
-const rec=new webkitSpeechRecognition();
-rec.lang="en-US";
-rec.start();
-rec.onresult=e=>{document.getElementById("userInput").value=e.results[0][0].transcript;}
-}
-async function askAI(){
-const userText=document.getElementById("userInput").value;
-const replyBox=document.getElementById("reply");
-replyBox.innerText="AI is thinking...";
-try{
-const res=await fetch("http://localhost:5000/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text:userText})});
-const data=await res.json();
-replyBox.innerText=data.reply;
-const msg=new SpeechSynthesisUtterance(data.reply);
-msg.lang="en-US";
-speechSynthesis.speak(msg);
-}catch(err){console.error(err);replyBox.innerText="Server error. Make sure Node.js server is running.";}
-}
-</script>
+    <h1>AI Teacher</h1>
+    <input type="text" id="question" placeholder="তোমার প্রশ্ন লিখো..." />
+    <button onclick="askAI()">জিজ্ঞাসা করো</button>
+    <div id="reply"></div>
+
+    <script>
+        async function askAI() {
+            const question = document.getElementById("question").value;
+            if (!question) return alert("প্রথমে প্রশ্ন লিখো!");
+
+            const replyDiv = document.getElementById("reply");
+            replyDiv.textContent = "উত্তর আসছে...";
+
+            try {
+                const res = await fetch("http://localhost:5000/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: question })
+                });
+
+                const data = await res.json();
+                replyDiv.textContent = data.reply;
+
+            } catch (err) {
+                console.error(err);
+                replyDiv.textContent = "সার্ভারে সমস্যা।";
+            }
+        }
+    </script>
 </body>
 </html>
